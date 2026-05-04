@@ -168,7 +168,7 @@ const Step3Commercials = () => {
   );
 };
 
-const Wizard = () => {
+const Wizard = ({ onPreview }) => {
   const { currentStep, nextStep, prevStep } = useProposal();
 
   const steps = [
@@ -215,7 +215,7 @@ const Wizard = () => {
             Next <ChevronRight size={18} />
           </button>
         ) : (
-          <button className="btn-success">
+          <button className="btn-success" onClick={onPreview}>
             Complete
           </button>
         )}

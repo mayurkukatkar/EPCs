@@ -14,6 +14,14 @@ const Preview = () => {
   const generatePdfBlob = async () => {
     if (!proposalRef.current) return null;
 
+    // Scroll to top to avoid canvas offset issues
+    window.scrollTo(0, 0);
+
+    // Ensure fonts are loaded
+    if (document.fonts) {
+      await document.fonts.ready;
+    }
+
     const pages = proposalRef.current.querySelectorAll('.proposal-page');
     
     const pdf = new jsPDF({
@@ -29,21 +37,30 @@ const Preview = () => {
       const page = pages[i];
 
       const canvas = await html2canvas(page, {
-        scale: 2,
+        scale: 2, // Higher quality
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
         width: page.scrollWidth,
-        height: page.scrollHeight
+        height: page.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Ensure the cloned page is visible and has no transforms
+          const clonedPage = clonedDoc.querySelectorAll('.proposal-page')[i];
+          if (clonedPage) {
+            clonedPage.style.transform = 'none';
+            clonedPage.style.margin = '0';
+            clonedPage.style.display = 'block';
+          }
+        }
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
       if (i > 0) {
         pdf.addPage();
       }
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
     }
 
     return pdf;
@@ -51,11 +68,12 @@ const Preview = () => {
 
   // Download PDF
   const handleExportPDF = async () => {
+    if (isExporting || isSharing) return;
     setIsExporting(true);
     try {
       const pdf = await generatePdfBlob();
       if (pdf) {
-        pdf.save('Ekvarta_Solar_Proposal.pdf');
+        pdf.save(`Ekvarta_Solar_Proposal_${Date.now()}.pdf`);
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -67,43 +85,46 @@ const Preview = () => {
 
   // Share on WhatsApp
   const handleWhatsAppShare = async () => {
+    if (isSharing || isExporting) return;
     setIsSharing(true);
     try {
       const pdf = await generatePdfBlob();
       if (!pdf) return;
 
       const pdfBlob = pdf.output('blob');
-      const pdfFile = new File([pdfBlob], 'Ekvarta_Solar_Proposal.pdf', { type: 'application/pdf' });
+      const fileName = `Ekvarta_Solar_Proposal.pdf`;
+      const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
-      // Try native Web Share API first (works on mobile)
+      const message = 
+        '🌞 *Solar Proposal - Ekvarta Energy Solutions*\n\n' +
+        'Namaste! Please find attached the solar proposal prepared for you.\n\n' +
+        '📞 For queries, call: 8551800208\n' +
+        '📧 Email: energyekvarta@gmail.com\n\n' +
+        '_Powered by Ekvarta Energy Solutions_';
+
+      // Try native Web Share API first (works on modern mobile browsers)
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         await navigator.share({
-          title: 'Solar Proposal - Ekvarta Energy Solutions',
-          text: 'Here is your solar power proposal from Ekvarta Energy Solutions. Please review the attached document.',
+          title: 'Solar Proposal',
+          text: message,
           files: [pdfFile]
         });
       } else {
-        // Fallback: Download PDF first, then open WhatsApp with a message
-        pdf.save('Ekvarta_Solar_Proposal.pdf');
+        // Fallback: Download the file and then open WhatsApp
+        // On desktop/many browsers, we can only share the text via URL
+        pdf.save(fileName);
         
-        const message = encodeURIComponent(
-          '🌞 *Solar Proposal - Ekvarta Energy Solutions*\n\n' +
-          'Namaste! Please find attached the solar proposal prepared for you.\n\n' +
-          '📞 For queries, call: 8551800208\n' +
-          '📧 Email: energyekvarta@gmail.com\n\n' +
-          '_Powered by Ekvarta Energy Solutions_'
-        );
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
         
-        // Small delay to let the PDF download complete
-        setTimeout(() => {
-          window.open(`https://wa.me/?text=${message}`, '_blank');
-        }, 1000);
+        // Open WhatsApp in a new tab
+        window.open(whatsappUrl, '_blank');
       }
     } catch (error) {
       // User cancelled the share or an error occurred
       if (error.name !== 'AbortError') {
         console.error('Error sharing:', error);
-        alert('Could not share. The PDF has been downloaded instead.');
+        alert('Could not share directly. The PDF has been downloaded. You can now share it manually on WhatsApp.');
       }
     } finally {
       setIsSharing(false);
