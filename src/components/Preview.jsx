@@ -40,7 +40,7 @@ const Preview = () => {
         const page = pages[i];
 
         const canvas = await html2canvas(page, {
-          scale: 1.0, // Scale 1.0 is essential for speed on mobile to meet user activation timing
+          scale: 0.8, // Low scale for maximum compatibility with mobile share limits
           useCORS: true,
           allowTaint: true,
           logging: false,
@@ -118,47 +118,48 @@ const Preview = () => {
       }
 
       const pdfBlob = pdf.output('blob');
-      const fileName = `Ekvarta_Solar_Proposal.pdf`;
+      const fileName = `Solar_Proposal_${Date.now()}.pdf`;
       const pdfFile = new File([pdfBlob], fileName, { 
         type: 'application/pdf',
         lastModified: Date.now()
       });
 
       const message = 
-        '🌞 *Solar Proposal - Ekvarta Energy Solutions*\n\n' +
-        'Namaste! Please find attached the solar proposal prepared for you.\n\n' +
-        '📞 For queries, call: 8551800208\n' +
-        '📧 Email: energyekvarta@gmail.com\n\n' +
-        '_Powered by Ekvarta Energy Solutions_';
+        '🌞 Solar Proposal - Ekvarta Energy Solutions\n\n' +
+        'Please find attached the solar proposal prepared for you.\n\n' +
+        '📞 8551800208 | 📧 energyekvarta@gmail.com';
 
-      // Check if sharing is supported
-      const canShare = navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] });
+      // Full share object for validation
+      const shareData = {
+        title: 'Solar Proposal',
+        text: message,
+        files: [pdfFile]
+      };
 
-      if (canShare) {
+      // Check if sharing is supported for this specific payload
+      const isShareSupported = navigator.share && navigator.canShare && navigator.canShare(shareData);
+
+      if (isShareSupported) {
         try {
-          await navigator.share({
-            title: 'Solar Proposal',
-            text: message,
-            files: [pdfFile]
-          });
+          await navigator.share(shareData);
         } catch (shareError) {
-          // If the user cancelled, we don't need to do anything
           if (shareError.name !== 'AbortError') {
+            console.error('Share API failed:', shareError);
             throw shareError;
           }
         }
       } else {
-        // Fallback: Download and provide instructions
+        // Fallback for browsers that don't support file sharing
         pdf.save(fileName);
-        alert('Your PDF is ready and has been downloaded. You can now share it manually.');
+        alert('File sharing is restricted by your browser. The PDF has been downloaded. You can now share it manually.');
         
-        // Open WhatsApp as a common fallback
+        // Open WhatsApp as a fallback for the text message
         const encodedMessage = encodeURIComponent(message);
         window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
       }
     } catch (error) {
-      console.error('Error sharing:', error);
-      alert('PDF is ready but could not be shared directly. It has been downloaded to your device.');
+      console.error('Critical Share Error:', error);
+      alert('Could not share directly (likely due to device security or size limits). The PDF has been downloaded to your device.');
     } finally {
       setIsSharing(false);
     }
