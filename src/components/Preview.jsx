@@ -40,13 +40,13 @@ const Preview = () => {
         const page = pages[i];
 
         const canvas = await html2canvas(page, {
-          scale: 0.8, // Low scale for maximum compatibility with mobile share limits
+          scale: 2.0, // High quality (300 DPI equivalent)
           useCORS: true,
           allowTaint: true,
           logging: false,
           backgroundColor: '#ffffff',
-          width: 794, // Fixed A4 width at 96dpi
-          height: 1123, // Fixed A4 height at 96dpi
+          width: 794, 
+          height: 1123,
           onclone: (clonedDoc) => {
             // CRITICAL: Reset any transforms on the wrapper or pages in the clone
             const clonedWrapper = clonedDoc.querySelector('.proposal-wrapper > div');
@@ -65,7 +65,7 @@ const Preview = () => {
           }
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.9);
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
         if (i > 0) {
           pdf.addPage();
