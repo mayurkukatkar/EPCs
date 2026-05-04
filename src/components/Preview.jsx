@@ -118,25 +118,18 @@ const Preview = () => {
       }
 
       const pdfBlob = pdf.output('blob');
-      const fileName = `Solar_Proposal_${Date.now()}.pdf`;
+      const fileName = 'proposal.pdf';
       const pdfFile = new File([pdfBlob], fileName, { 
         type: 'application/pdf',
         lastModified: Date.now()
       });
 
-      const message = 
-        '🌞 Solar Proposal - Ekvarta Energy Solutions\n\n' +
-        'Please find attached the solar proposal prepared for you.\n\n' +
-        '📞 8551800208 | 📧 energyekvarta@gmail.com';
-
-      // Full share object for validation
+      // Simplified share object — some browsers fail when sharing files + text together
       const shareData = {
-        title: 'Solar Proposal',
-        text: message,
         files: [pdfFile]
       };
 
-      // Check if sharing is supported for this specific payload
+      const message = '🌞 Solar Proposal from Ekvarta Energy Solutions. Please find the attached PDF.';
       const isShareSupported = navigator.share && navigator.canShare && navigator.canShare(shareData);
 
       if (isShareSupported) {
