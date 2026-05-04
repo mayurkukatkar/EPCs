@@ -102,15 +102,16 @@ const Preview = () => {
     }
   };
 
-  // Share Proposal (Generic Share)
-  const handleShare = async () => {
-    if (isSharing || isExporting) return;
-    
-    setIsSharing(true);
-    try {
-      // Small delay to ensure the UI updates to 'Sharing...'
-      await new Promise(r => setTimeout(r, 100));
+  const [shareReady, setShareReady] = useState(false);
+  const [preparedFile, setPreparedFile] = useState(null);
 
+  // Step 1: Prepare the PDF
+  const handlePrepareShare = async () => {
+    if (isSharing || isExporting) return;
+    setIsSharing(true);
+    setShareReady(false);
+
+    try {
       const pdf = await generatePdfBlob();
       if (!pdf) {
         setIsSharing(false);
@@ -118,43 +119,52 @@ const Preview = () => {
       }
 
       const pdfBlob = pdf.output('blob');
-      const fileName = 'proposal.pdf';
+      const fileName = 'Solar_Proposal_Ekvarta.pdf';
       const pdfFile = new File([pdfBlob], fileName, { 
         type: 'application/pdf',
         lastModified: Date.now()
       });
 
-      // Simplified share object — some browsers fail when sharing files + text together
-      const shareData = {
-        files: [pdfFile]
-      };
-
-      const message = '🌞 Solar Proposal from Ekvarta Energy Solutions. Please find the attached PDF.';
-      const isShareSupported = navigator.share && navigator.canShare && navigator.canShare(shareData);
-
-      if (isShareSupported) {
-        try {
-          await navigator.share(shareData);
-        } catch (shareError) {
-          if (shareError.name !== 'AbortError') {
-            console.error('Share API failed:', shareError);
-            throw shareError;
-          }
-        }
-      } else {
-        // Fallback for browsers that don't support file sharing
-        pdf.save(fileName);
-        alert('File sharing is restricted by your browser. The PDF has been downloaded. You can now share it manually.');
-        
-        // Open WhatsApp as a fallback for the text message
-        const encodedMessage = encodeURIComponent(message);
-        window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
-      }
+      setPreparedFile(pdfFile);
+      setShareReady(true);
     } catch (error) {
-      console.error('Critical Share Error:', error);
-      alert('Could not share directly (likely due to device security or size limits). The PDF has been downloaded to your device.');
+      console.error('Preparation Error:', error);
+      alert('Could not prepare the PDF. Please try again.');
     } finally {
       setIsSharing(false);
+    }
+  };
+
+  // Step 2: Final Share (Triggered by immediate user click)
+  const handleFinalShare = async () => {
+    if (!preparedFile) return;
+
+    const message = '🌞 Solar Proposal from Ekvarta Energy Solutions.';
+    const shareData = {
+      title: 'Solar Proposal',
+      text: message,
+      files: [preparedFile]
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Final fallback: just download
+        const url = URL.createObjectURL(preparedFile);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = preparedFile.name;
+        a.click();
+        alert('Sharing is restricted on this browser. The PDF has been downloaded.');
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        alert('Could not share. The PDF has been downloaded.');
+      }
+    } finally {
+      setShareReady(false);
+      setPreparedFile(null);
     }
   };
 
@@ -167,14 +177,24 @@ const Preview = () => {
           <span className="doc-type"><FileText size={14} /> 5 Pages</span>
         </div>
         <div className="toolbar-actions">
-          <button 
-            className="btn-share" 
-            onClick={handleShare}
-            disabled={isSharing}
-          >
-            {isSharing ? <Loader2 size={18} className="spin" /> : <Share2 size={18} />}
-            <span className="btn-text">Share</span>
-          </button>
+          {!shareReady ? (
+            <button 
+              className="btn-share" 
+              onClick={handlePrepareShare}
+              disabled={isSharing}
+            >
+              {isSharing ? <Loader2 size={18} className="spin" /> : <Share2 size={18} />}
+              <span className="btn-text">Share</span>
+            </button>
+          ) : (
+            <button 
+              className="btn-share-ready animate-pulse" 
+              onClick={handleFinalShare}
+            >
+              <Share2 size={18} />
+              <span className="btn-text">Click to Share</span>
+            </button>
+          )}
           <button 
             className="btn-export" 
             onClick={handleExportPDF}
@@ -195,19 +215,26 @@ const Preview = () => {
 
       {/* Mobile Floating Action Buttons */}
       <div className="mobile-fab-container">
-        <button 
-          className="fab fab-share" 
-          onClick={handleShare}
-          disabled={isSharing}
-          title="Share Proposal"
-        >
-          {isSharing ? <Loader2 size={22} className="spin" /> : <Share2 size={22} />}
-        </button>
+        {!shareReady ? (
+          <button 
+            className="fab fab-share" 
+            onClick={handlePrepareShare}
+            disabled={isSharing}
+          >
+            {isSharing ? <Loader2 size={22} className="spin" /> : <Share2 size={22} />}
+          </button>
+        ) : (
+          <button 
+            className="fab fab-share-ready animate-bounce" 
+            onClick={handleFinalShare}
+          >
+            <Share2 size={22} />
+          </button>
+        )}
         <button 
           className="fab fab-download" 
           onClick={handleExportPDF}
           disabled={isExporting}
-          title="Download PDF"
         >
           {isExporting ? <Loader2 size={22} className="spin" /> : <Download size={22} />}
         </button>
