@@ -1,0 +1,225 @@
+/* App.css — Mobile-First Responsive Layout */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  overflow: hidden;
+  background-color: var(--background);
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.logo-container h1 {
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text-main);
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.btn-secondary:hover {
+  background: var(--background);
+  border-color: var(--border-focus);
+}
+
+/* ===== MAIN LAYOUT — DESKTOP ===== */
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.wizard-section {
+  width: 420px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-shadow: var(--shadow-sm);
+  z-index: 5;
+  flex-shrink: 0;
+}
+
+.preview-section {
+  flex: 1;
+  background: #e2e8f0;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Custom Scrollbar */
+.preview-section::-webkit-scrollbar,
+.wizard-section::-webkit-scrollbar {
+  width: 6px;
+}
+.preview-section::-webkit-scrollbar-track,
+.wizard-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+.preview-section::-webkit-scrollbar-thumb,
+.wizard-section::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
+}
+
+/* ===== MOBILE BOTTOM TAB BAR ===== */
+.mobile-tab-bar {
+  display: none; /* Hidden on desktop */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: white;
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mobile-tab-bar button {
+  background: none;
+  border: none;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-item.active {
+  color: var(--primary);
+}
+
+.tab-item.active svg {
+  filter: drop-shadow(0 2px 4px rgba(30,86,49,0.3));
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .app-header {
+    height: 52px;
+    padding: 0 12px;
+  }
+
+  .btn-label-desktop {
+    display: none;
+  }
+
+  .btn-secondary {
+    padding: 8px 10px;
+  }
+
+  .logo-container h1 {
+    font-size: 0.9rem;
+    max-width: 180px;
+  }
+
+  /* Main layout becomes stacked */
+  .main-layout {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Tab switching — show/hide sections */
+  .wizard-section {
+    width: 100%;
+    border-right: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .preview-section {
+    width: 100%;
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .mobile-active {
+    display: flex !important;
+  }
+
+  /* Show the mobile tab bar */
+  .mobile-tab-bar {
+    display: flex;
+  }
+
+  /* Account for bottom tab bar */
+  .app-container {
+    padding-bottom: 64px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .logo-container h1 {
+    font-size: 0.8rem;
+    max-width: 140px;
+  }
+}

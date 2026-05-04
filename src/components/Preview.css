@@ -1,0 +1,206 @@
+/* Preview.css — Mobile-First with FABs */
+
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ===== TOOLBAR ===== */
+.preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.live-badge {
+  background: var(--primary-light);
+  color: var(--primary-hover);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.doc-type {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.btn-whatsapp,
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn-whatsapp {
+  background: #25d366;
+  color: white;
+}
+
+.btn-whatsapp:hover:not(:disabled) {
+  background: #1da851;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+}
+
+.btn-export {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-export:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30,86,49,0.3);
+}
+
+.btn-whatsapp:disabled,
+.btn-export:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== PROPOSAL WRAPPER ===== */
+.proposal-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 60px;
+}
+
+/* ===== MOBILE FLOATING ACTION BUTTONS ===== */
+.mobile-fab-container {
+  display: none; /* Hidden on desktop */
+  position: fixed;
+  bottom: 80px; /* Above the tab bar */
+  right: 16px;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+}
+
+.fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab:active {
+  transform: scale(0.92);
+}
+
+.fab:disabled {
+  opacity: 0.6;
+}
+
+.fab-whatsapp {
+  background: #25d366;
+}
+
+.fab-download {
+  background: var(--primary);
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .preview-container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .preview-toolbar {
+    margin: 0 0 12px 0;
+    border-radius: 0;
+    padding: 10px 12px;
+  }
+
+  /* Hide desktop toolbar buttons on mobile — FABs replace them */
+  .toolbar-actions {
+    display: none;
+  }
+
+  /* Show FABs on mobile */
+  .mobile-fab-container {
+    display: flex;
+  }
+
+  /* Scale proposal down to fit mobile viewport */
+  .proposal-wrapper {
+    transform-origin: top center;
+    padding-bottom: 100px;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .proposal-wrapper > div {
+    transform: scale(0.42);
+    transform-origin: top left;
+    margin-left: 8px;
+  }
+
+  .btn-text {
+    display: none;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .proposal-wrapper > div {
+    transform: scale(0.7);
+    transform-origin: top center;
+  }
+}
