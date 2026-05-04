@@ -54,7 +54,7 @@
 }
 
 /* ===== ACTION BUTTONS ===== */
-.btn-whatsapp,
+.btn-share,
 .btn-export {
   display: flex;
   align-items: center;
@@ -68,15 +68,15 @@
   cursor: pointer;
 }
 
-.btn-whatsapp {
-  background: #25d366;
+.btn-share {
+  background: #4f46e5;
   color: white;
 }
 
-.btn-whatsapp:hover:not(:disabled) {
-  background: #1da851;
+.btn-share:hover:not(:disabled) {
+  background: #4338ca;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+  box-shadow: 0 4px 12px rgba(79,70,229,0.3);
 }
 
 .btn-export {
@@ -90,7 +90,7 @@
   box-shadow: 0 4px 12px rgba(30,86,49,0.3);
 }
 
-.btn-whatsapp:disabled,
+.btn-share:disabled,
 .btn-export:disabled {
   opacity: 0.65;
   cursor: not-allowed;
@@ -147,8 +147,8 @@
   opacity: 0.6;
 }
 
-.fab-whatsapp {
-  background: #25d366;
+.fab-share {
+  background: #4f46e5;
 }
 
 .fab-download {

@@ -102,8 +102,8 @@ const Preview = () => {
     }
   };
 
-  // Share on WhatsApp
-  const handleWhatsAppShare = async () => {
+  // Share Proposal (Generic Share)
+  const handleShare = async () => {
     if (isSharing || isExporting) return;
     setIsSharing(true);
     try {
@@ -121,7 +121,7 @@ const Preview = () => {
         '📧 Email: energyekvarta@gmail.com\n\n' +
         '_Powered by Ekvarta Energy Solutions_';
 
-      // Try native Web Share API first (works on modern mobile browsers)
+      // Try native Web Share API first
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         await navigator.share({
           title: 'Solar Proposal',
@@ -129,21 +129,20 @@ const Preview = () => {
           files: [pdfFile]
         });
       } else {
-        // Fallback: Download the file and then open WhatsApp
-        // On desktop/many browsers, we can only share the text via URL
+        // Fallback: Download and provide instructions
         pdf.save(fileName);
         
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
         
-        // Open WhatsApp in a new tab
+        // Open WhatsApp as a common fallback, but alert the user
+        alert('Sharing directly is not supported on this browser. The PDF has been downloaded. You can now share it manually.');
         window.open(whatsappUrl, '_blank');
       }
     } catch (error) {
-      // User cancelled the share or an error occurred
       if (error.name !== 'AbortError') {
         console.error('Error sharing:', error);
-        alert('Could not share directly. The PDF has been downloaded. You can now share it manually on WhatsApp.');
+        alert('Could not share directly. The PDF has been downloaded.');
       }
     } finally {
       setIsSharing(false);
@@ -160,12 +159,12 @@ const Preview = () => {
         </div>
         <div className="toolbar-actions">
           <button 
-            className="btn-whatsapp" 
-            onClick={handleWhatsAppShare}
+            className="btn-share" 
+            onClick={handleShare}
             disabled={isSharing}
           >
-            {isSharing ? <Loader2 size={18} className="spin" /> : <MessageCircle size={18} />}
-            <span className="btn-text">WhatsApp</span>
+            {isSharing ? <Loader2 size={18} className="spin" /> : <Share2 size={18} />}
+            <span className="btn-text">Share</span>
           </button>
           <button 
             className="btn-export" 
@@ -188,12 +187,12 @@ const Preview = () => {
       {/* Mobile Floating Action Buttons */}
       <div className="mobile-fab-container">
         <button 
-          className="fab fab-whatsapp" 
-          onClick={handleWhatsAppShare}
+          className="fab fab-share" 
+          onClick={handleShare}
           disabled={isSharing}
-          title="Share on WhatsApp"
+          title="Share Proposal"
         >
-          {isSharing ? <Loader2 size={22} className="spin" /> : <MessageCircle size={22} />}
+          {isSharing ? <Loader2 size={22} className="spin" /> : <Share2 size={22} />}
         </button>
         <button 
           className="fab fab-download" 
