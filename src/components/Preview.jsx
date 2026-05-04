@@ -14,56 +14,75 @@ const Preview = () => {
   const generatePdfBlob = async () => {
     if (!proposalRef.current) return null;
 
-    // Scroll to top to avoid canvas offset issues
-    window.scrollTo(0, 0);
+    try {
+      // Scroll to top to avoid canvas offset issues
+      window.scrollTo(0, 0);
 
-    // Ensure fonts are loaded
-    if (document.fonts) {
-      await document.fonts.ready;
-    }
-
-    const pages = proposalRef.current.querySelectorAll('.proposal-page');
-    
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-
-      const canvas = await html2canvas(page, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        width: page.scrollWidth,
-        height: page.scrollHeight,
-        onclone: (clonedDoc) => {
-          // Ensure the cloned page is visible and has no transforms
-          const clonedPage = clonedDoc.querySelectorAll('.proposal-page')[i];
-          if (clonedPage) {
-            clonedPage.style.transform = 'none';
-            clonedPage.style.margin = '0';
-            clonedPage.style.display = 'block';
-          }
-        }
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-      if (i > 0) {
-        pdf.addPage();
+      // Ensure fonts are loaded
+      if (document.fonts) {
+        await document.fonts.ready;
       }
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-    }
+      const pages = proposalRef.current.querySelectorAll('.proposal-page');
+      if (pages.length === 0) return null;
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
 
-    return pdf;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+
+        const canvas = await html2canvas(page, {
+          scale: 1.5, // Slightly lower to save memory on mobile
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: 794, // Fixed A4 width at 96dpi
+          height: 1123, // Fixed A4 height at 96dpi
+          onclone: (clonedDoc) => {
+            // CRITICAL: Reset any transforms on the wrapper or pages in the clone
+            const clonedWrapper = clonedDoc.querySelector('.proposal-wrapper > div');
+            if (clonedWrapper) {
+              clonedWrapper.style.transform = 'none';
+              clonedWrapper.style.margin = '0';
+              clonedWrapper.style.padding = '0';
+            }
+            
+            const clonedPages = clonedDoc.querySelectorAll('.proposal-page');
+            clonedPages.forEach(p => {
+              p.style.transform = 'none';
+              p.style.margin = '0';
+              p.style.display = 'block';
+            });
+          }
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.9);
+
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        
+        // Clean up to save memory
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+
+      return pdf;
+    } catch (err) {
+      console.error('PDF Generation Internal Error:', err);
+      throw err;
+    }
   };
 
   // Download PDF
